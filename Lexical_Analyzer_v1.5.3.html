@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+
+  <title>Lexical Analyzer</title>
+  
+</head>
+<body>
+  <div class="Analyzer">
+    <h1>Lexical Analyzer</h1>
+    <label>BY: Shahab Azarabad</label>
+    <div class="app">
+    <div class="input">
+      <h2 for="code">Enter code:</h2>
+      <textarea id="code"></textarea>
+
+      <button onclick="analyzeCode()"style="--clr:#0FF0FC"><span>Analyze
+      </span><i></i></button>
+
+
+    </div>
+    <div class="output">
+      <h2>Tokens:</h2>
+      <div id="output"></div>
+
+    </div>
+  
+  </div>
+
+    
+
+    
+    
+  </div>
+
+  <script>
+   function tokenize(input) {
+  const keywords = ['if', 'else','for', 'while', 'import' , 'function' , 'log' , 'console','return'];
+  const comparisonOperators = ['<', '>', '<=', '>=', '==', '!=','||' , '&&'];
+  const tokens = [];
+  let current = 0;
+
+  while (current < input.length) {
+    let char = input[current];
+
+    if (/\s/.test(char)) {
+      current++;
+      continue;
+    }
+
+    if (/[a-zA-Z]/.test(char)) {
+  let word = '';
+  while (/[a-zA-Z]/.test(char) || /\d/.test(char)) {
+    word += char;
+    char = input[++current];
+  }
+  const tokenType = keywords.includes(word) ? 'keyword' : 'identifier';
+  tokens.push({ type: tokenType, value: word });
+  continue;
+}
+
+
+    if (/\d/.test(char)) {
+      let number = '';
+      while (/\d/.test(char)) {
+        number += char;
+        char = input[++current];
+      }
+      tokens.push({ type: 'integer', value: parseInt(number) });
+      continue;
+    }
+
+    if (char === '=' || char === '*'||char === '/' ||char === '-' ||char === '+') {
+      tokens.push({ type: 'operator', value: char });
+      current++;
+      continue;
+    }
+
+    if (comparisonOperators.includes(char)) {
+      tokens.push({ type: 'operator', value: char });
+      current++;
+      continue;
+    }
+
+    if (char === '"') {
+      let str = '';
+      char = input[++current];
+      while (char !== '"' && current < input.length) {
+        str += char;
+        char = input[++current];
+      }
+      if (char !== '"') {
+        throw new Error('Unterminated string literal');
+      }
+      tokens.push({ type: 'string', value: str });
+      current++;
+      continue;
+    }
+
+    if (/[\(\)\{\};,]/.test(char)) {
+      tokens.push({ type: char, value: char });
+      current++;
+      continue;
+    }
+
+    throw new Error(`Unexpected character: ${char}`);
+  }
+
+  return tokens;
+}
+
+
+
+    function analyzeCode() {
+      const inputCode = document.getElementById('code').value;
+      const outputDiv = document.getElementById('output');
+
+      try {
+        // Remove comments
+        const codeWithoutComments = inputCode.replace(/\/\/.*|\/\*[\s\S]*?\*\//g, '');
+
+        // Tokenize the code
+        const tokens = tokenize(codeWithoutComments);
+
+        // Display tokens
+        const tokenOutput = tokens.map(token => `${token.type}: ${token.value}`).join('\n');
+        outputDiv.textContent = tokenOutput;
+      } catch (error) {
+        outputDiv.textContent = `Error: ${error.message}`;
+      }
+    }
+  </script>
+
+</body>
+</html>
